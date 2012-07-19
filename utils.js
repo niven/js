@@ -62,5 +62,3 @@ function shuffle(list) {
 
 	return list;
 }
-
-print("i");
