@@ -21,6 +21,9 @@ load('utils.js');
 	
 	Trivia: originally written with pen and paper on holiday in about an hour 
 		(including many unexpected bugs changing from L/R to span/mid)
+		
+	Extra fun: this also avoids the usual bug as described in
+		http://googleresearch.blogspot.nl/2006/06/extra-extra-read-all-about-it-nearly.html
 
 */
 function binarySearch(list, target) {
