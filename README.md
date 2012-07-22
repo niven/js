@@ -13,3 +13,5 @@ binarySearch : Implemented a binary search for numbers to find out what the many
 
 mergeSort : Implemented mergesort to find out all the ways that can go wrong.
 
+fibonacci : Function that computes fibonacci(n) in sublinear time
+
