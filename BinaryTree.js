@@ -193,6 +193,60 @@ BinaryTree.prototype.balance = function() {
     }, this);    
 }
 
+// returns the values that are in this tree and the other
+BinaryTree.prototype.intersection = function( other ) {
+    
+    var a = this.iterator();
+    var b = other.iterator();
+    var out = [];
+    
+    var lowest = a.value() < b.value() ? a : b; // first item should exist    
+    // there can only be intersection as long as both still have items
+    while( a.hasNext() && b.hasNext() ) {
+        // if equal: add to accumulator, and increase both iterators
+        if( a.value() == b.value() ) {
+            out.push( lowest.value() );
+            a.next();
+            b.next();
+        } else {
+            lowest.next(); // since they are in order, just move the lowest one along
+        }
+    }        
+    
+    return out;
+}
+
+// return a list of all values not in other
+BinaryTree.prototype.elementsNotIn = function( other ) {
+    
+    var a = this.iterator();
+    var b = other.iterator();
+    var out = [];
+    
+    var lowest = a.value() < b.value() ? a : b; // first item should exist    
+    while( a.hasNext() && b.hasNext() ) {
+        // skip if equal
+        if( a.value() == b.value() ) {
+            a.next();
+            b.next();
+        } else {
+            if( a.value() < b.value() ) {
+                out.push( a.value() );
+            }
+            lowest.next(); // since they are in order, just move the lowest one along
+        }
+    }        
+    // add anything left in a: we ran out of b
+    while( a.hasNext() ) {
+        out.push( a.value() );
+        a.next();
+    }
+    
+    
+    return out;
+    
+}
+
 // make a tree
 var tree = new BinaryTree( numbers.shift() );
 numbers.forEach( function(n) {
@@ -254,6 +308,15 @@ prettyPrint(tree);
 print("Removing 8: " + tree.remove(8) );
 prettyPrint(tree);
 
+var tree2 = new BinaryTree(11);
+shuffle([12, 13, 15, 16, 17, 18]).forEach( function(n) { tree2.insert(n) });
+print("intersection with tree2: " );
+prettyPrint( tree2 );
+
+print("in common: " + tree.intersection(tree2) );
+
+print("elements in tree but not in tree2: " + tree.elementsNotIn( tree2 ) );
+print("elements in tree2 but not in tree: " + tree2.elementsNotIn( tree ) );
 print("done");
 
 
