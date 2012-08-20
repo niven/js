@@ -2,17 +2,16 @@
 load('utils.js');
 
 // [1,8) in random order
-var numbers = shuffle( range(1, 16) );
+var numbers = shuffle( range(1, 15) );
 print( "Making tree out of: " + numbers );
 
 function BinaryTree(val) {
-    
     this.val = val;
 }
 
 // insert creates subtrees so we don't need to have null leaf pointers taking up space
 BinaryTree.prototype.insert = function( n ) {
-    
+
     if( n > this.val ) {
         if( this.right == undefined ) {
             this.right = new BinaryTree(n);
@@ -26,6 +25,65 @@ BinaryTree.prototype.insert = function( n ) {
             this.left.insert(n);    
         }
     }
+    
+}
+
+// Remove an item from the tree, in a dirty way
+BinaryTree.prototype.remove = function( n ) {
+    
+    var goner = this.find(n);
+    if( goner == undefined ) {
+        return false;
+    }
+
+    // these are the values of the subtrees that we re-insert
+    var moved = [];
+    if( goner.right != undefined ) {
+        moved = moved.concat( goner.right.values() );
+    }
+    if( goner.left != undefined ) {
+        moved = moved.concat( goner.left.values() );
+    }
+
+    
+    // special case: if you remove the root, our hack with this.__last_find_parent doesn't work
+    if( this.val == n ) {
+        this.clear();
+        this.val = moved.pop();
+    } else {
+        // delete the item
+        if( this.__last_find_parent.left != undefined && this.__last_find_parent.left.val == n ) {
+            delete this.__last_find_parent.left;
+        } else {
+            delete this.__last_find_parent.right;
+        }
+    }
+
+    // reattach the left/right subtrees if there are any
+    moved.forEach( function(n) { this.insert(n) }, this);
+    
+    return true;
+}
+
+// returns the (sub)BinaryTree that holds the value n
+BinaryTree.prototype.find = function( n ) {
+    
+    this.__last_find_parent = undefined; // awful hack to make delete easier to write
+    var current = this;
+    while( current != undefined && current.val != n ) {        
+        this.__last_find_parent = current;
+        current = n > current.val ? current.right : current.left;
+    }
+    
+    return current;
+}
+
+// remove everything from this tree
+BinaryTree.prototype.clear = function() {
+
+    delete this.val;
+    delete this.left;
+    delete this.right;
     
 }
 
@@ -94,6 +152,47 @@ BinaryTree.prototype.iterator = function() {
     return new Iterator( this );
 }
 
+// balance the tree using reverse mergesort
+BinaryTree.prototype.balance = function() {
+    
+    // now sort the numbers in such a way that inserting them in order will result in
+    // a balanced tree. This is basically reverse-mergesorting :)
+    // (of course this not a very fast or cache friendly way to balance a tree)
+    
+    // 1 -> 1
+    // 1,2,3 -> 2,1,3 or 2,3,1
+    // 1,2,3,4,5,6,7 -> 4, (2, (1,3) ), (6, (5,7) )
+    
+    // algorithm: take a list. put the middle item in the front of a new list, then concat the left and right slices using the same appraoch
+
+    function demerge( n ) {
+        
+        var out = [];
+        
+        var middle = Math.floor( n.length/2 ); // floor so 1 item won't break
+    //    print("n: " + n + " middle: " + middle + " = " + n[middle] );
+        out.push( n[middle] );
+        // termination if nothing left
+        if( middle > 0 ) {
+            out = out.concat( demerge( n.slice(0, middle) ) );
+        }
+        if( middle+1 < n.length ) {
+            out = out.concat( demerge( n.slice(middle+1, n.length) ) );
+        }     
+        return out;
+    }
+    
+    
+    var demerged = demerge( this.values() );
+
+    // rebuild the tree
+    this.clear();
+    this.val = demerged.shift();
+    demerged.forEach( function(n) {
+        this.insert(n);
+    }, this);    
+}
+
 // make a tree
 var tree = new BinaryTree( numbers.shift() );
 numbers.forEach( function(n) {
@@ -102,8 +201,12 @@ numbers.forEach( function(n) {
     
 });
 
-// preorder traverse and print with spaces
+// preorder-LR traverse and print with spaces
 function prettyPrint( tree, depth ) {
+    
+    if( tree == undefined ) {
+        return;
+    }
     
     depth = depth == undefined ? "" : depth;
     
@@ -117,48 +220,9 @@ function prettyPrint( tree, depth ) {
 }
 
 
-
 prettyPrint( tree );
 numbers = tree.values();
 print( "values: " +  numbers + " sz: " + numbers.length);
-
-// now sort the numbers in such a way that inserting them in order will result in
-// a balanced tree. This is basically reverse-mergesorting :)
-// (of course this not a very fast or cache friendly way to balance a tree)
-
-// 1 -> 1
-// 1,2,3 -> 2,1,3 or 2,3,1
-// 1,2,3,4,5,6,7 -> 4, (2, (1,3) ), (6, (5,7) )
-
-// algorithm: take a list. put the middle item in the front of a new list, then concat the left and right slices using the same appraoch
-
-function demerge( n ) {
-    
-    var out = [];
-    
-    var middle = Math.floor( n.length/2 ); // floor so 1 item won't break
-//    print("n: " + n + " middle: " + middle + " = " + n[middle] );
-    out.push( n[middle] );
-    // termination if nothing left
-    if( middle > 0 ) {
-        out = out.concat( demerge( n.slice(0, middle) ) );
-    }
-    if( middle+1 < n.length ) {
-        out = out.concat( demerge( n.slice(middle+1, n.length) ) );
-    }     
-    return out;
-}
-
-var demerged = demerge(numbers);
-print("Demerged: " + demerged);
-
-var balanced = new BinaryTree( demerged.shift() );
-demerged.forEach( function(n) {
-    
-    balanced.insert(n);
-    
-});
-prettyPrint( balanced );
 
 var it = tree.iterator();
 var list = [];
@@ -169,6 +233,26 @@ do {
 } while( it.hasNext() );
 
 print("iterated: " + list);
+
+
+tree.balance();
+print("Balanced: ");
+prettyPrint( tree );
+
+print("subtree of 10:");
+prettyPrint( tree.find(10) );
+
+print("subtree of -8: " + tree.find(-8) );
+
+print("Removing 6: " + tree.remove(6) );
+prettyPrint(tree);
+print("Removing 7: " + tree.remove(7) );
+prettyPrint(tree);
+print("Removing 5: " + tree.remove(5) );
+prettyPrint(tree);
+
+print("Removing 8: " + tree.remove(8) );
+prettyPrint(tree);
 
 print("done");
 
