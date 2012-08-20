@@ -242,18 +242,51 @@ BinaryTree.prototype.elementsNotIn = function( other ) {
         a.next();
     }
     
-    
     return out;
-    
 }
 
+// returns true if this tree is equal to the other, defined as having the same elements
+// alsoStructure: optional, but if true this method also checks the tree structure
+BinaryTree.prototype.equals = function( other, alsoStructure ) {
+    
+    alsoStructure = alsoStructure == undefined ? false : alsoStructure;
+
+    if( !alsoStructure ) {
+        // they have the same values if their intersection is maximal
+        return tree.intersection( other ).length == this.values().length;
+    }
+
+    // actually check the structure
+    if( this.val != other.val ) {
+        return false;
+    }
+    
+    // check if either of them has a left branch while the other doesn't
+    if( this.left == undefined ^ other.left == undefined ) {
+        return false;
+    }
+
+    if( this.right == undefined ^ other.right == undefined ) {
+        return false;
+    }
+
+    // check their branches
+    var leftEqual = this.left == undefined ? true : this.left.equals( other.left, true );
+    var rightEqual = this.right == undefined ? true : this.right.equals( other.right, true );
+    
+    return leftEqual && rightEqual;    
+}
+
+
 // make a tree
-var tree = new BinaryTree( numbers.shift() );
-numbers.forEach( function(n) {
-    
-    tree.insert( n );
-    
-});
+var tree = treeFromList(numbers);
+
+function treeFromList( numbers ) {
+    var copy = numbers.slice(0);
+    var tree = new BinaryTree( copy.shift() );
+    copy.forEach( function(n) { tree.insert(n) } );
+    return tree;
+}
 
 // preorder-LR traverse and print with spaces
 function prettyPrint( tree, depth ) {
@@ -317,6 +350,12 @@ print("in common: " + tree.intersection(tree2) );
 
 print("elements in tree but not in tree2: " + tree.elementsNotIn( tree2 ) );
 print("elements in tree2 but not in tree: " + tree2.elementsNotIn( tree ) );
+
+print("tree equals tree2 (values): " + tree.equals(tree2) );
+
+print("Comparing tree(1,2,3) with tree(1,2,3) (values): " + treeFromList([1,2,3]).equals(treeFromList([1,2,3])));
+print("Comparing tree(1,2,3) with tree(1,2,3) (values+structure): " + treeFromList([1,2,3]).equals(treeFromList([1,2,3]), true));
+print("Comparing tree(1,2,3) with tree(3,2,1) (values): " + treeFromList([1,2,3]).equals(treeFromList([3,2,1])));
+print("Comparing tree(1,2,3) with tree(3,2,1) (values+structure): " + treeFromList([1,2,3]).equals(treeFromList([3,2,1]), true));
+
 print("done");
-
-
