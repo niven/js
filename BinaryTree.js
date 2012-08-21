@@ -1,10 +1,6 @@
 // jsc load for range() and shuffle()
 load('utils.js');
 
-// [1,8) in random order
-var numbers = shuffle( range(1, 15) );
-print( "Making tree out of: " + numbers );
-
 function BinaryTree(val) {
     this.val = val;
 }
@@ -278,9 +274,7 @@ BinaryTree.prototype.equals = function( other, alsoStructure ) {
 }
 
 
-// make a tree
-var tree = treeFromList(numbers);
-
+// create a tree from a list of numbers
 function treeFromList( numbers ) {
     var copy = numbers.slice(0);
     var tree = new BinaryTree( copy.shift() );
@@ -307,55 +301,3 @@ function prettyPrint( tree, depth ) {
 }
 
 
-prettyPrint( tree );
-numbers = tree.values();
-print( "values: " +  numbers + " sz: " + numbers.length);
-
-var it = tree.iterator();
-var list = [];
-
-do {
-    list.push( it.value() );
-    it.next();
-} while( it.hasNext() );
-
-print("iterated: " + list);
-
-
-tree.balance();
-print("Balanced: ");
-prettyPrint( tree );
-
-print("subtree of 10:");
-prettyPrint( tree.find(10) );
-
-print("subtree of -8: " + tree.find(-8) );
-
-print("Removing 6: " + tree.remove(6) );
-prettyPrint(tree);
-print("Removing 7: " + tree.remove(7) );
-prettyPrint(tree);
-print("Removing 5: " + tree.remove(5) );
-prettyPrint(tree);
-
-print("Removing 8: " + tree.remove(8) );
-prettyPrint(tree);
-
-var tree2 = new BinaryTree(11);
-shuffle([12, 13, 15, 16, 17, 18]).forEach( function(n) { tree2.insert(n) });
-print("intersection with tree2: " );
-prettyPrint( tree2 );
-
-print("in common: " + tree.intersection(tree2) );
-
-print("elements in tree but not in tree2: " + tree.elementsNotIn( tree2 ) );
-print("elements in tree2 but not in tree: " + tree2.elementsNotIn( tree ) );
-
-print("tree equals tree2 (values): " + tree.equals(tree2) );
-
-print("Comparing tree(1,2,3) with tree(1,2,3) (values): " + treeFromList([1,2,3]).equals(treeFromList([1,2,3])));
-print("Comparing tree(1,2,3) with tree(1,2,3) (values+structure): " + treeFromList([1,2,3]).equals(treeFromList([1,2,3]), true));
-print("Comparing tree(1,2,3) with tree(3,2,1) (values): " + treeFromList([1,2,3]).equals(treeFromList([3,2,1])));
-print("Comparing tree(1,2,3) with tree(3,2,1) (values+structure): " + treeFromList([1,2,3]).equals(treeFromList([3,2,1]), true));
-
-print("done");
