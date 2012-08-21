@@ -8,18 +8,15 @@ function BinaryTree(val) {
 // insert creates subtrees so we don't need to have null leaf pointers taking up space
 BinaryTree.prototype.insert = function( n ) {
 
-    if( n > this.val ) {
-        if( this.right == undefined ) {
-            this.right = new BinaryTree(n);
-        } else {
-            this.right.insert(n);    
+    var current = this;
+    var direction;
+    while( current.val != undefined ) {
+        direction = n > current.val ? "right" : "left";
+        if( current[direction] == undefined ) {
+            current[direction] = new BinaryTree(n);
+            return;
         }
-    } else {
-        if( this.left == undefined ) {
-            this.left = new BinaryTree(n);
-        } else {
-            this.left.insert(n);    
-        }
+        current = current[direction];
     }
     
 }
