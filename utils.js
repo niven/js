@@ -62,3 +62,17 @@ function shuffle(list) {
 
 	return list;
 }
+
+/*
+    Create and return a list of size items created by the generator function
+*/
+function makeList(size, generator) {
+    
+    var out = new Array(size);
+    
+    for(var i=0; i<size; i++) {
+        out[i] = generator();
+    }
+    
+    return out;
+}
