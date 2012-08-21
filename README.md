@@ -15,3 +15,4 @@ mergeSort : Implemented mergesort to find out all the ways that can go wrong.
 
 fibonacci : Function that computes fibonacci(n) in sublinear time
 
+BinaryTree : A binary tree class that supports balancing, intersection and comparison (both values and structure)
