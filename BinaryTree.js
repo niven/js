@@ -201,8 +201,6 @@ BinaryTree.prototype.balance_DSW = function(dotdump) {
         dot += this._dot_dump("g" + dot_generation++ + "_");
     }
     
-    prettyPrint(root);
-    
     // tree to vine
     
     var root = { val: "initial", right: this }; // dummy initial node
@@ -247,15 +245,18 @@ BinaryTree.prototype.balance_DSW = function(dotdump) {
         }
     };
     
-    leaf_count = size + 1 - Math.floor(Math.pow(2, Math.log(size+1))); 
+    leaf_count = size - Math.floor(Math.pow(2, Math.log(size+1))); 
     compression(root, leaf_count); // create deepest leaves
+    if( dotdump ) {
+        dot += root.right._dot_dump("g" + dot_generation++ + "_");
+    }
     
     size -= leaf_count; // we already did these
     
     while( size > 1 ) {
         size = Math.ceil( size/2 );
         compression(root, size);
-        if( dotdump ) { // only output here, there is no change if we just move the vine_tail
+        if( dotdump ) {
             dot += root.right._dot_dump("g" + dot_generation++ + "_");
         }
     }
@@ -404,3 +405,4 @@ function prettyPrint( tree, depth ) {
         prettyPrint( tree.right, depth + "  " );
     }
 }
+
