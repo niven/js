@@ -16,3 +16,6 @@ mergeSort : Implemented mergesort to find out all the ways that can go wrong.
 fibonacci : Function that computes fibonacci(n) in sublinear time
 
 BinaryTree : A binary tree class that supports balancing, intersection and comparison (both values and structure)
+         Also: implementation of the Day-Stout-Warren algorithm for balancing the tree
+         Run: jsc -e 'load("BinaryTree.js"); var t = treeFromList( shuffle( range(1,8)) ); t = t.balance_DSW(true);' | dot -Tpng -otree_balancing_DWS.png
+         On the command line to get a nice graph of all the steps of the algorithm if you have GraphViz installed
