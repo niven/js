@@ -186,6 +186,114 @@ BinaryTree.prototype.balance = function() {
     }, this);    
 }
 
+/*
+    Balance the tree using the Day-Stout_Warren algorithm.
+    
+    If dotdump is true it outputs a string you can run dot on to make a
+    graph so you can see what is going on at every step.
+    
+*/
+BinaryTree.prototype.balance_DSW = function(dotdump) {
+    
+    var dot = "";
+    var dot_generation = 0;
+    if( dotdump ) { // tree in current state
+        dot += this._dot_dump("g" + dot_generation++ + "_");
+    }
+    
+    prettyPrint(root);
+    
+    // tree to vine
+    
+    var root = { val: "initial", right: this }; // dummy initial node
+    var vine_tail = root;
+    var remainder = vine_tail.right;
+    var size = 0;
+    var temp;
+
+    while( remainder != undefined ) {
+        if( remainder.left == undefined ) {
+            // move vine_tail down one
+            vine_tail = remainder;
+            remainder = remainder.right;
+            size++;
+        } else { // rotate
+            temp = remainder.left;
+            remainder.left = temp.right;
+            temp.right = remainder;
+            remainder = temp;
+            vine_tail.right = temp;
+            if( dotdump ) { // only output here, there is no change if we just move the vine_tail
+                dot += root.right._dot_dump("g" + dot_generation++ + "_");
+            }
+        }
+    }
+    
+    
+    // vine to tree
+    // convert the vine with "size" nodes and pseudo-root node root into a balanced tree
+    var leaf_count;
+    
+    var compression = function(root, count) {
+        var scanner, child;
+        
+        scanner = root;
+        for(var i=1; i<count; i++) {
+            child = scanner.right;
+            scanner.right = child.right; 
+            scanner = scanner.right; 
+            child.right = scanner.left; 
+            scanner.left = child;
+        }
+    };
+    
+    leaf_count = size + 1 - Math.floor(Math.pow(2, Math.log(size+1))); 
+    compression(root, leaf_count); // create deepest leaves
+    
+    size -= leaf_count; // we already did these
+    
+    while( size > 1 ) {
+        size = Math.ceil( size/2 );
+        compression(root, size);
+        if( dotdump ) { // only output here, there is no change if we just move the vine_tail
+            dot += root.right._dot_dump("g" + dot_generation++ + "_");
+        }
+    }
+    
+    if( dotdump ) {
+        print("digraph {\n" + dot + "\n}");
+    }
+    
+    return root.right;
+}
+
+// internal function to output a dot string for vizualising
+// this outputs a dot without the enclosing "digraph {}" to you
+// can make a graph with multiple subgraphs easier
+// prefix is a prefix used for all nodes in the graph
+BinaryTree.prototype._dot_dump = function(prefix) {
+    
+    prefix = prefix == undefined ? "" : prefix;
+    
+    var dot_nodes = "";
+    var dot_links = "";
+    var current;
+    var stack = [this];
+    while( stack.length > 0 ) {
+        current = stack.pop();
+        dot_nodes += prefix + current.val + " [\n\tlabel = \"" + current.val + "\"\n];\n";     
+
+        ["right", "left"].forEach( function(branch){
+            if( current[branch] != undefined ) {
+                stack.push( current[branch] );
+                dot_links += prefix + current.val + " -> " + prefix + current[branch].val + "\n";
+            }
+        });
+    }
+    
+    return dot_nodes + dot_links;
+}
+
 // returns the values that are in this tree and the other
 BinaryTree.prototype.intersection = function( other ) {
     
@@ -296,5 +404,3 @@ function prettyPrint( tree, depth ) {
         prettyPrint( tree.right, depth + "  " );
     }
 }
-
-
