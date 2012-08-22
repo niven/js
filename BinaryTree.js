@@ -230,37 +230,27 @@ BinaryTree.prototype.balance_DSW = function(dotdump) {
     
     // vine to tree
     // convert the vine with "size" nodes and pseudo-root node root into a balanced tree
-    var leaf_count;
-    
-    var compression = function(root, count) {
-        var scanner, child;
-        
+    // do this by moving every other node to the left for the entire vine, and do that log_2(2) times
+    var scanner, child;
+    while( size > 1 ) {
+        size = Math.floor( size/2 );
+
         scanner = root;
-        for(var i=1; i<count; i++) {
+        for(var i=0; i<size; i++) {
             child = scanner.right;
-            scanner.right = child.right; 
+            scanner.right = child.right;
             scanner = scanner.right; 
             child.right = scanner.left; 
             scanner.left = child;
+
+            if( dotdump ) {
+                dot += root.right._dot_dump("g" + dot_generation++ + "_");
+            }
+
         }
-    };
-    
-    leaf_count = size - Math.floor(Math.pow(2, Math.log(size+1))); 
-    compression(root, leaf_count); // create deepest leaves
-    if( dotdump ) {
-        dot += root.right._dot_dump("g" + dot_generation++ + "_");
+
     }
-    
-    size -= leaf_count; // we already did these
-    
-    while( size > 1 ) {
-        size = Math.ceil( size/2 );
-        compression(root, size);
-        if( dotdump ) {
-            dot += root.right._dot_dump("g" + dot_generation++ + "_");
-        }
-    }
-    
+
     if( dotdump ) {
         print("digraph {\n" + dot + "\n}");
     }
@@ -405,4 +395,3 @@ function prettyPrint( tree, depth ) {
         prettyPrint( tree.right, depth + "  " );
     }
 }
-
