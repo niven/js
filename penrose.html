@@ -1,0 +1,126 @@
+<html>
+
+
+<head>
+	<title>Penrose tiling</title>
+<script type="text/javascript">
+
+function rect(r, phi) {	
+	return [ r * Math.cos(phi), r * Math.sin(phi) ];
+}
+
+var A = 1;
+var B = 2;
+var C = 3;
+
+var goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+// Create wheel of red triangles around the origin
+var triangles = [];
+
+function wheel(num) {
+	triangles = [];
+	for(var i=0; i<num; i++){
+	    var B = rect(1, (2*i - 1) * Math.PI / num);
+	    var C = rect(1, (2*i + 1) * Math.PI / num);
+	    if( i % 2 == 0 ) {
+	        var temp = B;
+			B = C;  // Make sure to mirror every second triangle
+	    	C = temp;
+		}
+		triangles.push([0, [0,0], B, C]) // middle (0,0) and B,C are coords
+	}
+	
+}
+
+var ctx;
+function init() {
+	ctx = document.getElementById("screen").getContext("2d");
+	ctx.translate(400, 400);
+	ctx.scale(400, 400);
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 0.005;
+}
+
+function reset() {
+	ctx.beginPath();
+	ctx.fillStyle = "wheat";
+	ctx.rect(-100, -1, 200, 200);
+	ctx.fill();
+}
+
+function step() {
+	subdivide();
+	draw();
+}
+
+function subdivide() {
+
+	var Px, Py, Rx, Ry, Qx, Qy;
+	var result = [];
+	
+	triangles.forEach(function(triangle){
+
+
+		if( triangle[0] == 0 ) { //red
+
+			Px = triangle[A][0] + (triangle[B][0] - triangle[A][0]) / goldenRatio;
+            Py = triangle[A][1] + (triangle[B][1] - triangle[A][1]) / goldenRatio;
+            result.push( [ 0, triangle[C], [Px, Py], triangle[B] ] );
+			result.push( [ 1, [Px, Py], triangle[C], triangle[A] ] );
+
+		} else { // blue
+            Qx = triangle[B][0] + (triangle[A][0] - triangle[B][0]) / goldenRatio;
+            Qy = triangle[B][1] + (triangle[A][1] - triangle[B][1]) / goldenRatio;
+            
+			Rx = triangle[B][0] + (triangle[C][0] - triangle[B][0]) / goldenRatio;
+            Ry = triangle[B][1] + (triangle[C][1] - triangle[B][1]) / goldenRatio;
+		
+			result.push( [1, [Rx, Ry], triangle[C], triangle[A]] );
+			result.push( [1, [Qx, Qy], [Rx, Ry], triangle[B]] );
+			result.push( [0, [Rx, Ry], [Qx, Qy], triangle[A]] );
+
+		}
+		
+	});
+	
+	triangles = result;
+
+}
+
+function draw() {
+	
+	triangles.forEach(function(triangle){
+		
+		ctx.fillStyle = triangle[0] == 0 ? "red" : "blue";
+		ctx.beginPath();
+		
+		ctx.moveTo( triangle[1][0], triangle[1][1] );
+		ctx.lineTo( triangle[2][0], triangle[2][1] );
+		ctx.lineTo( triangle[3][0], triangle[3][1] );
+		
+		ctx.stroke();
+		ctx.fill();
+		
+	});
+	
+}
+
+</script>
+
+</head>
+
+<body onload="init()">
+
+<canvas id="screen" width="800px" height="800px" style="background-color: wheat;">
+</canvas>
+
+<br>
+<button onclick="reset(); wheel(10); draw();">Wheel 10</button>
+<button onclick="reset(); wheel(16); draw();">Wheel 16</button>
+<br>
+<button onclick="step();">Next step</button>
+
+</body>
+
+</html>
