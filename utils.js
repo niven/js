@@ -76,3 +76,67 @@ function makeList(size, generator) {
     
     return out;
 }
+
+
+function dump( obj, indent ) {
+
+	if( indent === undefined ) {
+		indent = "";
+	}
+
+	if( typeof(obj) === 'object' ) {
+		
+		if( obj instanceof Array ) {
+			
+			if( obj.length == 0 ) {
+				return "[]";
+			}
+			
+			var out = "\n";
+			for(var i=0; i<obj.length; i++) {
+				 out += indent + "[" + i + "] = " + dump(obj[i], indent + "  ") + ",\n";
+			}
+			return out;
+		}
+		
+		var out = "{\n";
+		for( key in obj ) {
+			out += indent + "'" + key + "': " + dump(obj[key], indent + "  ") + ",\n";
+		}
+		return out + indent + "}"
+	} else if( typeof(obj) == "function" ) {
+		return "function()";
+	} else if ( typeof(obj) == "string" ) {
+		return "\"" + obj + "\"";
+	} else if( typeof(obj) == "number" ) {
+		return obj;
+	} else {
+		return typeof(obj) + " -> " + obj;
+	}
+	
+}
+
+function strFromMatrix( m, width ) {
+	var out = "";
+	out += "/ ";
+	for(var j=0; j<width; j++) {
+		out += m[j] + " ";
+	} 
+	out += " \\\n";
+	for(var i=1; i<(m.length/width)-1; i++) {
+		out += "| ";
+		for(var j=0; j<width; j++) {
+			out += (m[i*width+j] === undefined ? "_" : m[i*width+j]) + " ";
+		} 
+		out += " |\n";
+	}
+	if( m.length > 0 ) {
+		out += "\\ ";
+		for(var j=0; j<width; j++) {
+			out += (m[m.length-width+j] === undefined ? "_" : m[m.length-width+j]) + " ";
+		} 
+		out += " /\n";
+	}
+	
+	return out;
+}
