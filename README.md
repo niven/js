@@ -19,3 +19,5 @@ BinaryTree : A binary tree class that supports balancing, intersection and compa
          Also: implementation of the Day-Stout-Warren algorithm for balancing the tree
          Run: jsc -e 'load("BinaryTree.js"); var t = treeFromList( shuffle( range(1,8)) ); t = t.balance_DSW(true);' | dot -Tpng -otree_balancing_DWS.png
          On the command line to get a nice graph of all the steps of the algorithm if you have GraphViz installed
+
+wordhopping.js : From a colleague's interview question: Given a dictionary of words, find the longest chain of words a[0] .. a[n] for which the edit distance between a[i], a[i+] is 1.
