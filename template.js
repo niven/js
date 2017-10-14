@@ -20,11 +20,10 @@ var TMPL_RAW = 1;
 var TMPL_VAL = 2;
 
 function template_parse( tmpl ) {
-	var train;
-	
+
 	// make train
-	var carriage = 0;
 	var train = [];
+	var carriage = 0;
 
 	// match template vars {foo}
 	var tmpl_vars = /{[a-zA-Z0-9_.]*}/g;
@@ -38,55 +37,48 @@ function template_parse( tmpl ) {
 	}
 	
 	train[carriage] = { t:TMPL_RAW, v: tmpl.substr( pos ) };
-	console.log(train);
 	
 	return train;
 }	
 	
 function template_render( train, data ) {
-	var result = "";
 	
-	train.forEach( function(el, ids, arr) {
+	var result = train.map( (carriage) => {
 
-		switch( el.t ) { // trains switch of course
+		switch( carriage.t ) { // trains switch of course
 			case TMPL_RAW: {
-				result += el.v;
-				break;
+				return carriage.v;
 			};
 			case TMPL_VAL: {
-				var parts = el.v.split('.')
+				var parts = carriage.v.split('.');
 				var val = undefined;
+
 				do {
 					val = (val || data)[parts.shift()] || undefined;
 				} while (val !== undefined && parts.length);
 				
-				if( val !== undefined ) {
-					result += val;
-				} else {
-					result += "ERR_UNDEF(" + el.v + ")"; 
-				}
-				break;
+				return val || "ERR_UNDEF(" + carriage.v + ")";
 			};
 			default: {
-				throw "Unknow template type: " + el.t;
+				throw "Unknow template type: " + carriage.t;
 			}
 		}
 
 	});
 	
-	return result;
+	return result.join('');
 }
 
 function template_place( html_str, target, replace_content ) {
-	
+
 	var target_element = document.querySelector( target );
-	
-	var element = document.createElement('template');
-	element.innerHTML = html_str;
 
 	if( replace_content ) {
-		target_element.innerHTML = element.innerHTML;		
+		target_element.innerHTML = html_str;
 	} else {
+		// got through a template element to be able to create unparented <tr> and <li> elements
+		var element = document.createElement('template');
+		element.innerHTML = html_str;
 		target_element.appendChild( element.content );
 	}
 }
@@ -94,19 +86,19 @@ function template_place( html_str, target, replace_content ) {
 function template_apply( tmpl, data, target, replace_content ) {
 
 	var train = template_parse( tmpl );
+
 	var result = template_render( train, data );
 	
 	template_place( result, target, replace_content );
 }
 
 function template_loop_apply( tmpl, data, target, replace_content ) {
-	
+
 	var train = template_parse( tmpl );
-	var result = "";
-	
-	data.forEach( function(el, idx, arr) {
-		result += template_render( train, el );
-	});
+
+	var result = data.map(
+		( el ) => { return template_render( train, el ) }
+	).join('');
 
 	template_place( result, target, replace_content );	
 }
