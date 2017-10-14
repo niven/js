@@ -1,0 +1,45 @@
+<meta charset="utf-8"/>
+<html>
+<head>
+<script type="text/javascript" src="template.js"></script>
+</head>
+<body>
+
+<p>Enter template here:<br>
+<textarea id="t" rows="8" cols="50"></textarea>
+<p>
+
+<button onclick="template_apply(document.getElementById('t').value, {name: 'Foo', account: { id: 7, level: 3 } }, '#c', true);">render Single</button><br>
+<button onclick="template_loop_apply(document.getElementById('t').value, [{name: 'Foo', age:3}, {name: 'Bar', age:7}], '#l');">Render loop</button>
+
+<p>Single will be replaced here:<br>
+	using
+	<pre>
+		{
+			name: 'Foo', 
+			account: { 
+				id: 7, 
+				level: 3
+			}
+		}
+	</p>
+	</pre>
+<div id="c">Loading. . .</div>
+<p>Loop will be appended to this &lt;ol&gt; using</p>
+<pre>
+	[
+		{
+			name: 'Foo',
+			age: 3
+		}, 
+		{
+			name: 'Bar',
+			age: 7
+		}
+	]
+</pre>
+<ol id="l">
+</ol>
+
+</body>
+</html>
